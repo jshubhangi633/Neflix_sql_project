@@ -134,7 +134,7 @@ WHERE listed_in ILIKE '%documentaries%';
 
 ## 11) Find each year and the average numbers of content release in India on netflix
 
-```
+``` sql
 SELECT 
     country,
     release_year,
