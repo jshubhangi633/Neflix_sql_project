@@ -39,16 +39,16 @@ select type,count(*) as total_content from netflix group by type;
 ```
 ## 2) Find the Most Common Rating for Movies and TV Shows
 ``` sql
-SELECT
+select
 type, rating
 FROM
 
 (
-SELECT
+select
 type, rating, count(*),
 rank()over(partition by type order by count(*)desc) as ranking
-FROM netflix
-GROUP BY 1,2
+from netflix
+group by 1,2
 ) as t1 where ranking = 1;
 ```
 
@@ -62,32 +62,30 @@ release_year=2020 ;
 
 ## 4) Find the Top 5 Countries with the Most Content on Netflix
 ``` sql
-SELECT * 
-FROM
-(
-    SELECT 
-        UNNEST(STRING_TO_ARRAY(country, ',')) AS country,
-        COUNT(*) AS total_content
-    FROM netflix
-    GROUP BY 1
-) AS t1
-WHERE country IS NOT NULL
-ORDER BY total_content DESC
-LIMIT 5;
+select
+    unnest(string_to_array(country,','))as new_country,
+        count(show_id)as total_content 
+from netflix
+group by 1 
+order by 2 desc
+limit 5;
 ```
 ## 5) Identify the Longest Movie
 ``` sql
-SELECT 
-    *
-FROM netflix
-WHERE type = 'Movie'
-ORDER BY SPLIT_PART(duration, ' ', 1)::INT DESC;
+select*from netflix
+where type='Movie'
+            and
+duration=(select max(duration)from netflix
+);
 ```
 ## 6) Find Content Added in the Last 5 Years
 ``` sql
-SELECT *
-FROM netflix
-WHERE TO_DATE(date_added, 'Month DD, YYYY') >= CURRENT_DATE - INTERVAL '5 years';
+select*
+from netflix
+where to_date(date_added,'Month DD,YYYY')>=current_date-interval '5 years'
+
+
+select current_date- interval '5 years';
 ```
 
 ## 7) Find All Movies/TV Shows by Director 'Rajiv Chilaka'
@@ -103,10 +101,16 @@ WHERE director_name = 'Rajiv Chilaka';
 ```
 ## 8)  List All TV Shows with More Than 5 Seasons
 ``` sql
+select*from netflix
+where type='TV Show'
+duration> 5 seasons 
+
+
+-- List all TV Shows with more than 5 seasons
 SELECT *
 FROM netflix
 WHERE type = 'TV Show'
-  AND SPLIT_PART(duration, ' ', 1)::INT > 5;
+  AND CAST(split_part(duration, ' ', 1) AS INTEGER) > 5;
 ```
 
 ## 9) Count the Number of Content Items in Each Genre
@@ -184,4 +188,9 @@ description ilike '%violence%'
 
 with new_table
 ```
+## Conclusion 
+-Content Distribution: The dataset contains a diverse range of movies and TV shows with varying ratings and genres.
+-Common Ratings: Insights into the most common ratings provide an understanding of the content's target audience.
+-Geographical Insights: The top countries and the average content releases by India highlight regional content distribution.
+-Content Categorization: Categorizing content based on specific keywords helps in understanding the nature of content available on Netflix.
 
