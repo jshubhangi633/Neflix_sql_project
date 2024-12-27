@@ -3,7 +3,10 @@ This project is a comprehensive analysis of Netflix's movies and TV shows datase
 ![Netflix Logo](https://github.com/jshubhangi633/Neflix_sql_project/blob/main/BrandAssets_Logos_01-Wordmark.jpg)
 
 ## Objective 
-Analyze the distribution of content types (movies vs TV shows).
-Identify the most common ratings for movies and TV shows.
-List and analyze content based on release years, countries, and durations.
-Explore and categorize content based on specific criteria and keywords.
+-Analyze the distribution of content types (movies vs TV shows).
+-Identify the most common ratings for movies and TV shows.
+-List and analyze content based on release years, countries, and durations.
+-Explore and categorize content based on specific criteria and keywords.
+
+## Dataset link
+https://www.kaggle.com/datasets/shivamb/netflix-shows?resource=download
