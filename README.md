@@ -40,3 +40,17 @@ SELECT
 FROM netflix
 GROUP BY 1;
 ```
+## 2- Find the Most Common Rating for Movies and TV Shows
+``` sql
+SELECT
+type, rating
+FROM
+
+(
+SELECT
+type, rating, count(*),
+rank()over(partition by type order by count(*)desc) as ranking
+FROM netflix
+GROUP BY 1,2
+) as t1 where ranking = 1;
+``` 
