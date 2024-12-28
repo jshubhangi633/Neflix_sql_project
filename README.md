@@ -34,58 +34,81 @@ CREATE TABLE netflix
 
 ## 1) Count the Number of Movies vs TV Shows
 ``` sql
-select*from netflix
-select type,count(*) as total_content from netflix group by type;
+
+SELECT 
+	type,
+	COUNT(*)
+FROM netflix
+GROUP BY 1
+
 ```
 ## 2) Find the Most Common Rating for Movies and TV Shows
 ``` sql
-select
+SELECT
 type, rating
 FROM
 
 (
-select
+SELECT
 type, rating, count(*),
 rank()over(partition by type order by count(*)desc) as ranking
-from netflix
+FROM netflix
 group by 1,2
 ) as t1 where ranking = 1;
 ```
 
 ## 3) List All Movies Released in a Specific Year (e.g., 2020)
 ``` sql
-select*from netflix
-where type='Movie'
-and
-release_year=2020 ;
+SELECT*FROM netflix 
+--filter 2020
+--movies
+SELECT*FROM netflix
+        WHERE type='Movie'
+        AND 
+        release_year=2020 ;
 ```
 
 ## 4) Find the Top 5 Countries with the Most Content on Netflix
 ``` sql
-select
-    unnest(string_to_array(country,','))as new_country,
-        count(show_id)as total_content 
-from netflix
-group by 1 
-order by 2 desc
-limit 5;
+SELECT * 
+FROM
+(
+	SELECT 
+		-- country,
+		UNNEST(STRING_TO_ARRAY(country, ',')) as country,
+		COUNT(*) as total_content
+	FROM netflix
+	GROUP BY 1
+)as t1
+WHERE country IS NOT NULL
+ORDER BY total_content DESC
+LIMIT 5;
+
+--this shows combination of countries combined which have released the movie 
+UNNEST(string_to_array(country,','))AS new_country
+FROM netflix
+
 ```
 ## 5) Identify the Longest Movie
 ``` sql
-select*from netflix
-where type='Movie'
-            and
-duration=(select max(duration)from netflix
-);
+
+SELECT 
+	*
+FROM netflix
+WHERE type = 'Movie'
+ORDER BY SPLIT_PART(duration, ' ', 1)::INT DESC;
+
 ```
 ## 6) Find Content Added in the Last 5 Years
 ``` sql
-select*
-from netflix
-where to_date(date_added,'Month DD,YYYY')>=current_date-interval '5 years'
 
+SELECT
+*
+FROM netflix
+WHERE TO_DATE(date_added, 'Month DD, YYYY') >= CURRENT_DATE - INTERVAL '5 years'
 
-select current_date- interval '5 years';
+SELECT CURRENT_DATE- interval '5 years';
+
 ```
 
 ## 7) Find All Movies/TV Shows by Director 'Rajiv Chilaka'
@@ -101,8 +124,8 @@ WHERE director_name = 'Rajiv Chilaka';
 ```
 ## 8)  List All TV Shows with More Than 5 Seasons
 ``` sql
-select*from netflix
-where type='TV Show'
+SELECT*FROM netflix
+WHERE type='TV Show'
 duration> 5 seasons 
 
 
@@ -115,21 +138,21 @@ WHERE type = 'TV Show'
 
 ## 9) Count the Number of Content Items in Each Genre
 ``` sql
-select*from netflix
-select listed_in, show_id,
-string_to_array(listed_in,',')from netflix
+SELECT*FROM netflix
+    SELECT listed_in, show_id,
+string_to_array(listed_in,',')FROM netflix
 
-select*from netflix
-select unnest(string_to_array(listed_in,',')) as genre ,
-count(show_id)
+SELECT*FROM netflix
+SELECT UNNEST(string_to_array(listed_in,',')) AS genre ,
+COUNT(show_id)
 
-from netflix
-group by 1;
+FROM netflix
+GROUP BY 1;
 ```
 ## 10) Select all the movies that are documentaries
 ``` sql
-select*from netflix
-WHERE listed_in ILIKE '%documentaries%';
+SELECT*FROM netflix
+WHERE listed_in ILIKE '%documentaries%'
 ```
 
 ## 11) Find each year and the average numbers of content release in India on netflix
@@ -151,42 +174,61 @@ LIMIT 5;
 ```
 ## 12)  Find all content without a director
 ``` sql
-select *from netflix
-where director is NULL;
+SELECT*FROM netflix
+WHERE director is NULL;
 ```
 ## 13) Find in how many movies did Salman Khan appear in the last 10 years
 ``` sql
-select*from netflix
-where casts ILIKE '%Salman Khan%'
-and release_year> extract(year from current_date) - 10;
+SELECT*FROM netflix
+WHERE casts ILIKE '%Salman Khan%'
+AND release_year> extract(year from current_date) - 10;
 ```
 ## 14) Find the top 10 actors who have appeared in the highest number of movies produced in india
 
 ``` sql
-select
-unnest(string_to_array(casts,',')) as actors,
-count(*) as total_content from netflix where country ilike '%india%' group by 1 
-order by 2 desc
-limit 10;
+SELECT
+UNNEST(string_to_array(casts,',')) AS actors,
+COUNT(*) AS total_content 
+    FROM netflix 
+    WHERE country ilike '%india%' 
+    GROUP BY  1 
+ORDER BY 2 desc
+LIMIT 10;
+
 ```
 ## 15) Categorize the content based on the presence of keywords 'kill' and 'violence' in the description field. label content containing these keywords as 'bad' and all other content as 'good'. Count how many items fall under each category.
 
 ```sql
-select
-*, case 
- when description ilike '%kill%'
-or 
-description ilike '%violence%' then 'bad_content'
-else 'good_content'
-end category 
 
-from netflix
 
-where description ilike '%kill%'
-or 
+SELECT
+*, CASE
+ WHEN description ilike '%kill%'
+OR 
+description ilike '%violence%' THEN 'bad_content'
+ELSE 'good_content'
+END category 
+
+FROM netflix
+
+WHERE description ilike '%kill%'
+OR 
 description ilike '%violence%'
 
-with new_table
+WITH new_table 
+AS
+(SELECT
+*, CASE
+ WHERE description ilike '%kill%'
+OR 
+description ilike '%violence%' THEN 'bad_content'
+ELSE 'good_content'
+  END category 
+
+FROM netflix) SELECT category,
+    COUNT(*) AS total_content
+FROM new_table GROUP BY 1;
+
 ```
 ## Conclusion 
 -Content Distribution: The dataset contains a diverse range of movies and TV shows with varying ratings and genres.
